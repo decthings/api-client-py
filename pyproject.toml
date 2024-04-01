@@ -1,0 +1,18 @@
+[project]
+name = "decthings-api"
+version = "0.0.1"
+description = "Official Python API client for Decthings"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests >= 2",
+    "aiohttp >= 3",
+    "websockets >= 11"
+]
+[project.urls]
+"Homepage" = "https://github.com/decthings/api-client-py"
