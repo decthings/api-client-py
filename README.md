@@ -11,7 +11,7 @@
 ---
 #### Documentation
 
-Documentation for this package is available [here](https://decthings.com/docs/api-python).
+Documentation for this package is available [here](https://decthings.com/reference/python).
 
 ---
 
