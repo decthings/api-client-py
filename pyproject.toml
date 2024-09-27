@@ -1,6 +1,6 @@
 [project]
 name = "decthings-api"
-version = "0.0.2"
+version = "0.0.3"
 description = "Official Python API client for Decthings"
 readme = "README.md"
 requires-python = ">=3.6"
