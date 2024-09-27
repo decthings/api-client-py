@@ -10,9 +10,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "requests >= 2",
     "aiohttp >= 3",
-    "websockets >= 11"
+    "numpy >= 2",
+    "requests >= 2",
+    "websockets >= 13"
 ]
 [project.urls]
 "Homepage" = "https://github.com/decthings/api-client-py"

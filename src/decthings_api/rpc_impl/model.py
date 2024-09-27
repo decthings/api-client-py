@@ -104,6 +104,14 @@ class ModelRpc:
         res = await self.__client._raw_method_call('Model', 'setFilesystemSize', params, [])
         return res[1], res[2]
 
+    async def get_filesystem_usage(self, params):
+        res = await self.__client._raw_method_call('Model', 'getFilesystemUsage', params, [])
+        return res[1], res[2]
+
+    async def set_image(self, params):
+        res = await self.__client._raw_method_call('Model', 'setImage', params, [])
+        return res[1], res[2]
+
     async def create_state(self, params):
         if not isinstance(params, dict):
             raise TypeError("Invalid params: Expected a dict.")
