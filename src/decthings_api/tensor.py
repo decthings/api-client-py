@@ -7,8 +7,8 @@ class DecthingsElementImage:
     def __init__(self, format: str, data: bytes):
         if not isinstance(format, str):
             raise ValueError("Invalid format: Expected a string.")
-        if len(format.encode()) != 3:
-            raise ValueError("The format must be exactly three bytes.")
+        if len(format.encode()) > 255:
+            raise ValueError("The format must be no more than 255 bytes.")
         if not isinstance(data, bytes):
             raise ValueError("Invalid data: Expected bytes")
 
@@ -25,8 +25,8 @@ class DecthingsElementAudio:
     def __init__(self, format: str, data: bytes):
         if not isinstance(format, str):
             raise ValueError("Invalid format: Expected a string.")
-        if len(format.encode()) != 3:
-            raise ValueError("The format must be exactly three bytes.")
+        if len(format.encode()) > 255:
+            raise ValueError("The format must be no more than 255 bytes.")
         if not isinstance(data, bytes):
             raise ValueError("Invalid data: Expected bytes")
 
@@ -43,8 +43,8 @@ class DecthingsElementVideo:
     def __init__(self, format: str, data: bytes):
         if not isinstance(format, str):
             raise ValueError("Invalid format: Expected a string.")
-        if len(format.encode()) != 3:
-            raise ValueError("The format must be exactly three bytes.")
+        if len(format.encode()) > 255:
+            raise ValueError("The format must be no more than 255 bytes.")
         if not isinstance(data, bytes):
             raise ValueError("Invalid data: Expected bytes")
 
@@ -252,9 +252,12 @@ class DecthingsTensor:
                     pos += varint_len
                     if len(data) < pos + length:
                         raise ValueError("Invalid data. Unexpected end of bytes.")
-                    if length < 3:
-                        raise ValueError("Invalid data. Expected at least 3 bytes for image.")
-                    res[i] = DecthingsElementImage(data[pos : pos + 3].decode(), data[pos + 3 : pos + length])
+                    if length < 1:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing image format.")
+                    format_length = data[pos]
+                    if length < 1 + format_length:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing image format.")
+                    res[i] = DecthingsElementImage(data[pos + 1 : pos + 1 + format_length].decode(), data[pos + 1 + format_length : pos + length])
                     pos += length
             elif data_type == "audio":
                 for i in range(0, num_elements):
@@ -267,9 +270,12 @@ class DecthingsTensor:
                     pos += varint_len
                     if len(data) < pos + length:
                         raise ValueError("Invalid data. Unexpected end of bytes.")
-                    if length < 3:
-                        raise ValueError("Invalid data. Expected at least 3 bytes for audio.")
-                    res[i] = DecthingsElementAudio(data[pos : pos + 3].decode(), data[pos + 3 : pos + length])
+                    if length < 1:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing audio format.")
+                    format_length = data[pos]
+                    if length < 1 + format_length:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing audio format.")
+                    res[i] = DecthingsElementAudio(data[pos + 1 : pos + 1 + format_length].decode(), data[pos + 1 + format_length : pos + length])
                     pos += length
             elif data_type == "video":
                 for i in range(0, num_elements):
@@ -282,9 +288,12 @@ class DecthingsTensor:
                     pos += varint_len
                     if len(data) < pos + length:
                         raise ValueError("Invalid data. Unexpected end of bytes.")
-                    if length < 3:
-                        raise ValueError("Invalid data. Expected at least 3 bytes for video.")
-                    res[i] = DecthingsElementVideo(data[pos : pos + 3].decode(), data[pos + 3 : pos + length])
+                    if length < 1:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing video format.")
+                    format_length = data[pos]
+                    if length < 1 + format_length:
+                        raise ValueError("Invalid data. Unexpected end of bytes while parsing video format.")
+                    res[i] = DecthingsElementVideo(data[pos + 1 : pos + 1 + format_length].decode(), data[pos + 1 + format_length : pos + length])
                     pos += length
 
             return (DecthingsTensor(res, data_type, shape), pos)
@@ -332,25 +341,28 @@ class DecthingsTensor:
                     el = self._data[i]
                     if not isinstance(el, DecthingsElementImage):
                         raise ValueError(f"For type image, expected all elements to be instances of DecthingsElementImage. Got {str(type(el))}.")
-                    if len(el._format.encode()) != 3:
-                        raise ValueError("Corrupt data. Expected the 'format' field of each image to be three bytes long.")
-                    size += varint.get_varuint64_length(len(el._format.encode())) + len(el._data)
+                    encoded_format = el._format.encode()
+                    if len(encoded_format) > 255:
+                        raise ValueError("Corrupt data. Expected the 'format' field of each image to be no more than 255 bytes long.")
+                    size += varint.get_varuint64_length(1 + len(encoded_format) + len(el._data)) + 1 + len(encoded_format) + len(el._data)
             elif self._type == "audio":
                 for i in range(0, num_elements):
                     el = self._data[i]
                     if not isinstance(el, DecthingsElementAudio):
                         raise ValueError(f"For type audio, expected all elements to be instances of DecthingsElementAudio. Got {str(type(el))}.")
-                    if len(el._format.encode()) != 3:
-                        raise ValueError("Corrupt data. Expected the 'format' field of each audio to be three bytes long.")
-                    size += varint.get_varuint64_length(len(el._format.encode())) + len(el._data)
+                    encoded_format = el._format.encode()
+                    if len(encoded_format) > 255:
+                        raise ValueError("Corrupt data. Expected the 'format' field of each audio to be no more than 255 bytes long.")
+                    size += varint.get_varuint64_length(1 + len(encoded_format) + len(el._data)) + 1 + len(encoded_format) + len(el._data)
             else:
                 for i in range(0, num_elements):
                     el = self._data[i]
                     if not isinstance(el, DecthingsElementVideo):
                         raise ValueError(f"For type video, expected all elements to be instances of DecthingsElementVideo. Got {str(type(el))}.")
-                    if len(el._format.encode()) != 3:
-                        raise ValueError("Corrupt data. Expected the 'format' field of each video to be three bytes long.")
-                    size += varint.get_varuint64_length(len(el._format.encode())) + len(el._data)
+                    encoded_format = el._format.encode()
+                    if len(encoded_format) > 255:
+                        raise ValueError("Corrupt data. Expected the 'format' field of each video to be no more than 255 bytes long.")
+                    size += varint.get_varuint64_length(1 + len(encoded_format) + len(el._data)) + 1 + len(encoded_format) + len(el._data)
 
             size += varint.get_varuint64_length(size - header_size)
 
@@ -400,21 +412,25 @@ class DecthingsTensor:
                     after_header.append(el._data)
             elif self._type == "audio":
                 for el in elements:
-                    if not isinstance(el, DecthingsElementImage):
+                    if not isinstance(el, DecthingsElementAudio):
                         raise ValueError("Corrupt tensor.")
-                    if len(el._format.encode()) != 3:
-                        raise ValueError("Corrupt data. Expected the 'format' field of each image to be three bytes long.")
-                    after_header.append(varint.serialize_varuint64(3 + len(el._data)))
-                    after_header.append(el._format.encode())
+                    encoded_format = el._format.encode()
+                    if len(encoded_format) > 255:
+                        raise ValueError("Corrupt data. Expected the 'format' field of each audio to be no more than 255 bytes long.")
+                    after_header.append(varint.serialize_varuint64(1 + len(encoded_format) + len(el._data)))
+                    after_header.append(bytes([len(encoded_format)]))
+                    after_header.append(encoded_format)
                     after_header.append(el._data)
             else:
                 for el in elements:
-                    if not isinstance(el, DecthingsElementImage):
+                    if not isinstance(el, DecthingsElementVideo):
                         raise ValueError("Corrupt tensor.")
-                    if len(el._format.encode()) != 3:
-                        raise ValueError("Corrupt data. Expected the 'format' field of each image to be three bytes long.")
-                    after_header.append(varint.serialize_varuint64(3 + len(el._data)))
-                    after_header.append(el._format.encode())
+                    encoded_format = el._format.encode()
+                    if len(encoded_format) > 255:
+                        raise ValueError("Corrupt data. Expected the 'format' field of each video to be no more than 255 bytes long.")
+                    after_header.append(varint.serialize_varuint64(1 + len(encoded_format) + len(el._data)))
+                    after_header.append(bytes([len(encoded_format)]))
+                    after_header.append(encoded_format)
                     after_header.append(el._data)
 
             res.append(varint.serialize_varuint64(sum([len(x) for x in after_header])))
