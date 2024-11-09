@@ -11,7 +11,6 @@ from .rpc_impl.language import LanguageRpc
 from .rpc_impl.model import ModelRpc
 from .rpc_impl.persistent_launcher import PersistentLauncherRpc
 from .rpc_impl.spawned import SpawnedRpc
-from .rpc_impl.team import TeamRpc
 from .rpc_impl.terminal import TerminalRpc
 from .rpc_impl.user import UserRpc
 
@@ -60,7 +59,6 @@ class DecthingsClient:
         self.model = ModelRpc(self)
         self.persistent_launcher = PersistentLauncherRpc(self)
         self.spawned = SpawnedRpc(self)
-        self.team = TeamRpc(self)
         self.terminal = TerminalRpc(self)
         self.user = UserRpc(self)
 

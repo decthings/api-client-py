@@ -10,7 +10,6 @@ from .rpc_impl.language import LanguageRpcSync
 from .rpc_impl.model import ModelRpcSync
 from .rpc_impl.persistent_launcher import PersistentLauncherRpcSync
 from .rpc_impl.spawned import SpawnedRpcSync
-from .rpc_impl.team import TeamRpcSync
 from .rpc_impl.terminal import TerminalRpcSync
 from .rpc_impl.user import UserRpcSync
 
@@ -59,7 +58,6 @@ class DecthingsClientSync:
         self.model = ModelRpcSync(self)
         self.persistent_launcher = PersistentLauncherRpcSync(self)
         self.spawned = SpawnedRpcSync(self)
-        self.team = TeamRpcSync(self)
         self.terminal = TerminalRpcSync(self)
         self.user = UserRpcSync(self)
 
